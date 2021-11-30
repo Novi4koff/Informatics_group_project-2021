@@ -1,6 +1,8 @@
 #Импортирование библиотек
 import pygame
 import sys
+import ctypes
+ctypes.windll.user32.SetProcessDPIAware()
 from pygame.draw import *
 import math
 import random
@@ -11,7 +13,7 @@ import random
 """
 pygame.init()
 FPS = 120
-screen = pygame.display.set_mode((1200, 650))
+screen = pygame.display.set_mode((1200, 900))
 RED = 0xFF0000
 BLUE = 0x0000FF
 YELLOW = 0xFFC91F
@@ -29,7 +31,7 @@ number_of_walls = 20
 walls_x_size = 4
 walls_y_size = 60
 x_borders = [0, 1200]
-y_borders = [0, 650]
+y_borders = [0, 900]
 
 class Walls:
 	"""

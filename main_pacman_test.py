@@ -1,4 +1,6 @@
 import pygame
+import ctypes
+ctypes.windll.user32.SetProcessDPIAware()
 import sys
 from pygame.draw import *
 import math
