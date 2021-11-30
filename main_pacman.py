@@ -1,3 +1,4 @@
+#Импортирование библиотек
 import pygame
 import sys
 from pygame.draw import *
@@ -10,7 +11,7 @@ import random
 """
 pygame.init()
 FPS = 120
-screen = pygame.display.set_mode((1200, 900))
+screen = pygame.display.set_mode((1200, 650))
 RED = 0xFF0000
 BLUE = 0x0000FF
 YELLOW = 0xFFC91F
@@ -28,7 +29,7 @@ number_of_walls = 20
 walls_x_size = 4
 walls_y_size = 60
 x_borders = [0, 1200]
-y_borders = [0, 900]
+y_borders = [0, 650]
 
 class Walls:
 	"""
@@ -37,6 +38,9 @@ class Walls:
 	2 - горизонтальная стена)
 	"""
 	def __init__(self, screen, type_of_wall):
+		"""
+		Функция задаёт значения параметров класса (поверхность, цвет, тип стены, ширину, высоту, координаты левой верхней вершины).
+		"""
 		self.screen = screen
 		self.color = GREY
 		self.type_of_wall = type_of_wall
@@ -49,7 +53,10 @@ class Walls:
 		self.x = random.randint(x_borders[0], x_borders[1])
 		self.y = random.randint(y_borders[0], y_borders[1])
 	def draw(self):
-		pygame.draw.rect(screen, self.color, (self.x, self.y, self.x_size, self.y_size))
+		"""
+		Этот метод рисует стену в виде серого прямоугольника.
+		"""
+		pygame.draw.rect(self.screen, self.color, (self.x, self.y, self.x_size, self.y_size))
 class Pacman:
 	"""
 	Тип данных, описывающий pacman'а.
@@ -58,6 +65,10 @@ class Pacman:
 	только одного конкретного цвета, или "предсказывающие" траектории шариков) 
 	"""
 	def __init__(self, screen):
+		"""
+		Функция инициализации пакмана. Его параметры - счётчик очков, поверность, цвет, радиус, начальные координаты,
+		начальная скорость, начальная общая скорость и тангенс угла наклона скорости к горизонту
+		"""
 		self.point = 0
 		self.screen = screen
 		self.color = YELLOW
@@ -70,6 +81,10 @@ class Pacman:
 		self.angle_speed = self.vy / self.vx
 
 	def move(self):
+		"""
+		Данный метод описывает движение пакмана. Метод находит цель, которая находится на наименьшем расстоянии от пакмана,
+		и изменяет его скорость так, чтобы он двигался к цели.
+		"""
 		distance = 1000000
 		sgnvx = 0
 		sgnvy = 0
@@ -93,6 +108,9 @@ class Pacman:
 			self.y += self.vy
 
 	def draw(self):
+		"""
+		Метод рисует пакмана в виде жёлтого шарика
+		"""
 		pygame.draw.circle(screen, self.color, (self.x, self.y), self.r )
 
 	def collision_check(self):
@@ -118,7 +136,7 @@ class Pacman:
 		pacman'у начисляются очки
 		"""
 		for targets in list_of_targets:
-			if ((self.x - targets.x)**2 + (self.y - targets.y)**2)**0.5 <= targets.r**2:
+			if ((self.x - targets.x)**2 + (self.y - targets.y)**2)**0.5 <= targets.r:
 				list_of_targets.remove(targets)
 				self.point += targets.point
 class Food:
@@ -127,6 +145,9 @@ class Food:
 	Содержит его координаты, размеры, скорость и направление скорости
 	"""
 	def __init__(self, screen):
+		"""
+		Метод инициаоизрует парамеры цели (очки, поверхность, цвет, координаты, скорость, радиус)
+		"""
 		self.point = 1
 		self.screen = screen
 		self.color = random.choice(GAME_COLORS) 
@@ -152,10 +173,16 @@ class Food:
 				if wall.type_of_wall == 2:
 					self.vy = -self.vy
 	def move(self):
+		"""
+		Метод, описывающий движение цели
+		"""
 		self.collision_check()
 		self.x += self.vx
 		self.y += self.vy
 	def draw(self):
+		"""
+		Метод рисует цель в виде маленького шарика
+		"""
 		pygame.draw.circle(screen, self.color, (self.x, self.y), self.r )
 def fill_list_of_walls():
 	"""
@@ -179,7 +206,7 @@ def fill_list_of_pacmans():
 	list_of_pacmans.append(new_pacman)
 def move_all_object():
 	"""
-	Функция двигающая все обьекты на экране (еду и pacman'ов)
+	Функция, двигающая все обьекты на экране (еду и pacman'ов) и следящая за количество очков, полученных пакманом за поимку цели.
 	"""
 	for target in list_of_targets:
 		target.move()
