@@ -82,8 +82,8 @@ class Pacman:
 		self.screen = screen
 		self.color = YELLOW
 		self.r = 10
-		self.x = random.randint(x_borders[0] + self.r, x_borders[1] - self.r)
-		self.y = random.randint(y_borders[0] + self.r, y_borders[1] - self.r)
+		self.x = int(random.randint(x_borders[0] + self.r, x_borders[1] - self.r))
+		self.y = int(random.randint(y_borders[0] + self.r, y_borders[1] - self.r))
 		self.vx = 2
 		self.vy = 2
 		self.v = ((self.vx)**2 + (self.vy)**2)**0.5

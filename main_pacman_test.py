@@ -117,7 +117,7 @@ class Pacman:
 			self.y += self.vy
 
 	def draw(self):
-		pygame.draw.circle(screen, self.color, (self.x, self.y), self.r )
+		pygame.draw.circle(screen, self.color, (int(self.x), int(self.y)), self.r )
 
 	def collision_check(self):
 		"""
