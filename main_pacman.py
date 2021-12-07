@@ -18,8 +18,8 @@ if os.name=="nt":
 	window_width = 1200
 	window_height = 900
 if os.name=="posix":
-	window_height = 600
-	window_width= 600
+	window_height = 900
+	window_width= 1200
 screen = pygame.display.set_mode((window_width, window_height))
 RED = 0xFF0000
 BLUE = 0x0000FF
@@ -34,7 +34,7 @@ GAME_COLORS = [RED, BLUE, YELLOW, GREEN, MAGENTA, CYAN]
 list_of_targets = []
 list_of_pacmans = []
 list_of_walls = []
-number_of_walls = 20
+number_of_walls = 30
 walls_x_size = 4
 walls_y_size = 60
 x_borders = [0, window_width]
@@ -236,7 +236,7 @@ def score(screen, x, y, font_size):
     i = 0
     for pacman in list_of_pacmans:
     	i += 30
-    	text = "СЧЕТ "+ str(i/30) + ": " + str(pacman.point)
+    	text = "скорость "+ str(round(((pacman.vx)**2+(pacman.vy)**2)**0.5, 2)) + " СЧЕТ "+ str(i/30) + ": " + str(pacman.point)
     	score = font2.render(text, True, YELLOW)
     	screen.blit(score, [x, y + i])
 fill_list_of_walls()
