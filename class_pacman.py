@@ -46,10 +46,7 @@ class Walls:
 	Содержит координаты и размеры стены а также тип (1 - вертикальная стена, 
 	2 - горизонтальная стена)
 	"""
-	def __init__(self, screen, type_of_wall):
-		"""
-		Функция задаёт значения параметров класса (поверхность, цвет, тип стены, ширину, высоту, координаты левой верхней вершины).
-		"""
+	def __init__(self, screen, type_of_wall, x = None, y = None):
 		self.screen = screen
 		self.color = GREY
 		self.type_of_wall = type_of_wall
@@ -59,13 +56,17 @@ class Walls:
 		else:
 			self.x_size = walls_y_size
 			self.y_size = walls_x_size
-		self.x = random.randint(x_borders[0], x_borders[1])
-		self.y = random.randint(y_borders[0], y_borders[1])
+		if x == None:
+			self.x = random.randint(x_borders[0], x_borders[1])
+		else:
+			self.x = x
+		if y == None:
+			self.y = random.randint(y_borders[0], y_borders[1])
+		else: 
+			self.y = y
 	def draw(self):
-		"""
-		Этот метод рисует стену в виде серого прямоугольника.
-		"""
-		pygame.draw.rect(self.screen, self.color, (self.x, self.y, self.x_size, self.y_size))
+		pygame.draw.rect(screen, self.color, (self.x, self.y, self.x_size, self.y_size))
+
 class Pacman:
 	"""
 	Тип данных, описывающий pacman'а.
@@ -239,12 +240,18 @@ def score(screen, x, y, font_size):
     	text = "скорость "+ str(round(((pacman.vx)**2+(pacman.vy)**2)**0.5, 2)) + " СЧЕТ "+ str(i/30) + ": " + str(pacman.point)
     	score = font2.render(text, True, YELLOW)
     	screen.blit(score, [x, y + i])
+
+def added_new_wall(x, y, type_of_wall):
+	new_target = Walls(screen, type_of_wall, x, y)
+	list_of_walls.append(new_target)
+
 fill_list_of_walls()
 pygame.display.update()
 clock = pygame.time.Clock()
 finished = False
 while not finished:
 	screen.fill(BLACK)
+	pos = pygame.mouse.get_pos()
 	clock.tick(FPS)
 	move_all_object()
 	for event in pygame.event.get():
@@ -255,6 +262,10 @@ while not finished:
 	keys = pygame.key.get_pressed()
 	if keys[pygame.K_DOWN]:
 		fill_list_of_pacmans()
+	elif keys[pygame.K_s]:
+		added_new_wall(pos[0], pos[1], 1)
+	elif keys[pygame.K_a]:
+		added_new_wall(pos[0], pos[1], -1)
 	pygame.display.update()
 
 pygame.quit()

@@ -31,11 +31,13 @@ WHITE = 0xFFFFFF
 GREY = 0x7D7D7D
 GAME_COLORS = [RED, BLUE, YELLOW, GREEN, MAGENTA, CYAN]
 TYPES_OF_WALLS = [-1, 1]
-list_of_targets = []
+list_of_herbivore = []
 list_of_pacmans = []
 list_of_pacmans_child = []
 list_of_walls = []
+list_of_foods = []
 number_of_walls = 40
+number_of_foods = 30
 walls_x_size = 4
 walls_y_size = 60
 x_borders = [0, window_width]
@@ -94,8 +96,8 @@ class Pacman:
 		v_relativ_max = None
 		sgnvx = 0
 		sgnvy = 0
-		if not list_of_targets == []:
-			for targets in list_of_targets:
+		if not list_of_herbivore == []:
+			for targets in list_of_herbivore:
 				vx_per = -targets.vx
 				vy_per = -targets.vy
 				v_per = ((vx_per)**2 + (vy_per)**2)**0.5
@@ -153,9 +155,9 @@ class Pacman:
 		Функция, проверяющая догнал ли pacman цель. Если догнал, то цель удаляется и
 		pacman'у начисляются очки
 		"""
-		for targets in list_of_targets:
+		for targets in list_of_herbivore:
 			if ((self.x - targets.x)**2 + (self.y - targets.y)**2)**0.5 <= targets.r**2:
-				list_of_targets.remove(targets)
+				list_of_herbivore.remove(targets)
 				self.point += targets.point
 
 	def reproduction(self, number_of_food = 3):
@@ -169,7 +171,7 @@ class Pacman:
 
 
 
-class Food:
+class herbivore:
 	"""
 	Тип данных, описывающий цели.
 	Содержит его координаты, размеры, скорость и направление скорости
@@ -178,7 +180,7 @@ class Food:
 		self.parent = None
 		self.point = 1
 		self.screen = screen
-		self.color = random.choice(GAME_COLORS) 
+		self.color = BLUE
 		self.x = random.randint(x_borders[0], x_borders[1])
 		self.y = random.randint(y_borders[0], y_borders[1])
 		speed_Food = [-2, 2]
@@ -186,6 +188,7 @@ class Food:
 		self.vy = random.randint(speed_Food[0], speed_Food[1])
 		self.v = ((self.vx)**2 + (self.vy)**2)**0.5
 		self.r = 4
+
 	def collision_check(self):
 		"""
 		Функция, проверяющая столкновение целей со стенами и границами экрана. В случае
@@ -201,12 +204,66 @@ class Food:
 					self.vx = -self.vx
 				if wall.type_of_wall == -1:
 					self.vy = -self.vy
+
+	def eat_check(self):
+		"""
+		Функция, проверяющая догнал ли травоядный цель. Если догнал, то цель удаляется и
+		pacman'у начисляются очки
+		"""
+		for targets in list_of_foods:
+			if ((self.x - targets.x)**2 + (self.y - targets.y)**2)**0.5 <= targets.r**2:
+				list_of_foods.remove(targets)
+				self.point += targets.point
+
 	def move(self):
+		"""
+		Данный метод описывает движение пакмана. Метод находит цель, которая находится на наименьшем расстоянии от пакмана,
+		и изменяет его скорость так, чтобы он двигался к цели.
+		"""
+		distance = 1000000
+		sgnvx = 0
+		sgnvy = 0
+		for targets in list_of_foods:
+			if ((self.x - targets.x)**2 + (self.y - targets.y)**2)**0.5 < distance:
+				distance = ((self.x - targets.x)**2 + (self.y - targets.y)**2)**0.5
+				self.angle_speed = (targets.y - self.y) / (targets.x - self.x + 0.000001)
+				if  targets.y - self.y >= 0:
+					sgnvy = 1
+				else:
+					sgnvy = -1
+				if  targets.x - self.x >= 0:
+					sgnvx = 1
+				else:
+					sgnvx = -1
+		self.vx = sgnvx * (self.v / ((1 + (self.angle_speed)**2))**0.5)
+		self.vy = sgnvy * (((self.v)**2 - (self.vx)**2)**0.5) 
 		self.collision_check()
-		self.x += self.vx
-		self.y += self.vy
+		if distance < 1000000:
+			self.x += self.vx
+			self.y += self.vy
+
 	def draw(self):
 		pygame.draw.circle(screen, self.color, (self.x, self.y), self.r )
+
+class Food:
+	def __init__(self, screen):
+		self.parent = None
+		self.point = 1
+		self.screen = screen
+		self.color = GREEN
+		self.x = random.randint(x_borders[0], x_borders[1])
+		self.y = random.randint(y_borders[0], y_borders[1])
+		speed_Food = [-2, 2]
+		self.vx = random.randint(speed_Food[0], speed_Food[1])
+		self.vy = random.randint(speed_Food[0], speed_Food[1])
+		self.v = ((self.vx)**2 + (self.vy)**2)**0.5
+		self.r = 3
+
+	def draw(self):
+		pygame.draw.circle(screen, self.color, (self.x, self.y), self.r )
+
+
+
 
 class Pacman_smart(Pacman):
 	'''
@@ -238,6 +295,9 @@ class Pacman_smart(Pacman):
 					else:
 						self.vx = self.v
 					self.vy = 0 
+
+
+
 class Pacman_child(Pacman_smart):
 	'''
 	Только что появившийся от другого пакмана, всюду следует за родителем, пока не вырастет
@@ -297,25 +357,35 @@ def fill_list_of_walls_continous():
 			list_of_walls.append(new_wall)
 
 
-def fill_list_of_targets():
+def fill_list_of_herbivore():
 	"""
-	Функция заполняющая список целей случайными целями
+	Функция заполняющая список травоядных
 	"""
-	new_target = Food(screen)
-	list_of_targets.append(new_target)
+	new_herbivore = herbivore(screen)
+	list_of_herbivore.append(new_herbivore)
 def fill_list_of_pacmans():
 	"""
 	Функция заполняющая список pacman'а
 	"""
 	new_pacman = Pacman_smart(screen)
 	list_of_pacmans.append(new_pacman)
-def move_all_object():
+
+def fill_list_of_foods():
 	"""
-	Функция двигающая все обьекты на экране (еду и pacman'ов)
+	Функция заполняющая список еды для травоядных
 	"""
-	for target in list_of_targets:
-		target.move()
-		target.draw()
+	for i in range(number_of_foods):
+		new_food = Food(screen)
+		list_of_foods.append(new_food)
+
+def move_and_draw_all_object():
+	"""
+	Функция двигающая все обьекты на экране и отрисовывает их (еду и pacman'ов)
+	"""
+	for herbivore in list_of_herbivore:
+		herbivore.move()
+		herbivore.draw()
+		herbivore.eat_check()
 	for pacman in list_of_pacmans:
 		pacman.move()
 		pacman.draw()
@@ -325,6 +395,8 @@ def move_all_object():
 		#pacman.move() FIXME# Написать движение pacman_child
 	for wall in list_of_walls:
 		wall.draw()
+	for food in list_of_foods:
+		food.draw()
 	score(screen, 100, 100, 40)
 	pygame.display.update()
 
@@ -373,6 +445,7 @@ def score(screen, x, y, font_size):
     	score = font2.render(text, True, YELLOW)
     	screen.blit(score, [x, y + i])
 fill_list_of_walls_separate()
+fill_list_of_foods()
 pygame.display.update()
 clock = pygame.time.Clock()
 finished = False
@@ -380,13 +453,13 @@ while not finished:
 	pos = pygame.mouse.get_pos()
 	screen.fill(BLACK)
 	clock.tick(FPS)
-	move_all_object()
+	move_and_draw_all_object()
 	groving_up_check()
 	for event in pygame.event.get():
 		if event.type == pygame.QUIT:
 			finished = True
 		elif event.type == pygame.MOUSEBUTTONDOWN:
-			fill_list_of_targets()
+			fill_list_of_herbivore()
 	keys = pygame.key.get_pressed()
 	if keys[pygame.K_DOWN]:
 		fill_list_of_pacmans()
