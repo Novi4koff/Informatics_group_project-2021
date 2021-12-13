@@ -2,7 +2,8 @@ from evolution_constants import *
 
 def fill_list_of_walls_separate(body, num):
 	"""
-	Функция заполняющая список стен случайными стенами
+	Функция заполняющая список стен случайными стенами (горизонтальными и вертикальными) со 
+	случайными координатами
 	"""
 	for i in range (num):
 		type_of_wall = random.choice(TYPES_OF_WALLS)
@@ -29,39 +30,38 @@ def fill_list_of_walls_continous():
 			new_wall = Walls(screen, type_of_wall, x_new_wall, y_new_wall)
 			list_of_walls.append(new_wall)
 
-def fill_list_of_herbivore(body, TIME):
+def fill_list_of_herbivore(body, TIME, time_to_die):
 	"""
-	Функция заполняющая список травоядных
+	Функция создающая травоядного со случайными координатами
 	"""
-	new_herbivore = body(screen, TIME)
+	new_herbivore = body(screen, TIME, time_to_die)
 	list_of_herbivore.append(new_herbivore)
 
-def fill_list_of_pacmans(body, TIME):
+def fill_list_of_pacmans(body, TIME, time_to_die):
 	"""
-	Функция заполняющая список хищников с "умной" моделью поведения
+	Функция создающая хищника с "умной" моделью поведения со случайными координатами
 	"""
-	new_pacman = body(screen, TIME)
+	new_pacman = body(screen, TIME, time_to_die)
 	list_of_pacmans.append(new_pacman)
 
-def fill_list_of_pacmans_direct(body, TIME):
+def fill_list_of_pacmans_direct(body, TIME, time_to_die):
 	"""
-	Функция заполняющая список хищников с "прямой"" моделью поведения
+	Функция создающая хищника с прямолинейной моделью поведения со случайными координатами
 	"""
-	new_pacman = body(screen, TIME)
+	new_pacman = body(screen, TIME, time_to_die)
 	new_pacman.color = WHITE
 	list_of_pacmans_direct.append(new_pacman)
 
 
 def fill_list_of_foods(body, num):
-
 	"""
-	Функция заполняющая список еды для травоядных
+	Функция заполняющая список еды для травоядных в количестве num
 	"""
 	for i in range(num):
 		new_food = body(screen)
 		list_of_foods.append(new_food)
 
-def move_and_draw_all_object(TIME):
+def move_and_draw_all_object(TIME, time_to_die_herbivore, time_to_die_predator):
 	"""
 	Функция двигает все обьекты на экране и отрисовывает их (еду, травоядных, хищников и стены). Также проверяет
 	размножение, смерть и поедание пищи
@@ -71,13 +71,13 @@ def move_and_draw_all_object(TIME):
 		herbivore.draw()
 		herbivore.eat_check(TIME)
 		herbivore.die_check()
-		herbivore.reproduction_check(TIME)
+		herbivore.reproduction_check(TIME, time_to_die_herbivore)
 	for pacman in list_of_pacmans:
 		pacman.move()
 		pacman.draw()
 		pacman.eat_check(TIME)
 		pacman.die_check()
-		pacman.reproduction_check(TIME)
+		pacman.reproduction_check(TIME, time_to_die_predator)
 	for pacman in list_of_pacmans_child:
 		pacman.draw()
 		#pacman.move() FIXME# Написать движение pacman_child. Если будем использовать подкласс Pacman_child
@@ -86,7 +86,7 @@ def move_and_draw_all_object(TIME):
 		pacman.draw()
 		pacman.eat_check(TIME)
 		pacman.die_check()
-		pacman.reproduction_check(TIME)
+		pacman.reproduction_check(TIME, time_to_die_predator)
 	for wall in list_of_walls:
 		wall.draw()
 	for food in list_of_foods:
@@ -105,12 +105,12 @@ def groving_up_check(list_of_creatures = list_of_pacmans_child):
 		if True is False:
 			children.growing_up()
 
-def born_new_pacman(body, TIME, x, y, list_ = list_of_pacmans, parent = None):
+def born_new_pacman(body, TIME, x, y, time_to_die, list_ = list_of_pacmans, parent = None):
 	"""
 	Функция создающая хищника в данных координатах (x, y) в массиве list_
 	с родителем parent
 	"""
-	new_pacman = body(screen, TIME)
+	new_pacman = body(screen, TIME, time_to_die)
 	if list_ is list_of_pacmans_direct:
 		new_pacman.color = WHITE
 	if list_ is list_of_pacmans_child:
@@ -133,11 +133,11 @@ def added_new_food(body, x, y, vx = 0, vy = 0):
 	new_target.vy = vy
 	list_of_foods.append(new_target)
 
-def added_new_predator(body, TIME, x, y, list_ = list_of_pacmans):
+def added_new_predator(body, TIME, x, y, time_to_die, list_ = list_of_pacmans):
 	"""
 	Функция добавляющая нового хищника типа body в точку (x, y).
 	"""
-	new_target = body(screen, TIME)
+	new_target = body(screen, TIME, time_to_die)
 	if list_ is list_of_pacmans_direct:
 		new_target.color = WHITE
 	new_target.x = x
@@ -153,7 +153,7 @@ def added_new_wall(body, x, y, type_of_wall):
 
 def score(screen, x, y, font_size):
     """
-    Функция показывает количество очков, набранное каждым pacman'ом
+    Функция показывает на экране количество очков, набранное каждым умным хищником
     """
     font2 = pygame.font.Font(None, font_size)
     i = 0

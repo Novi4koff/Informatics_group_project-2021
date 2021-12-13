@@ -4,7 +4,7 @@ from evolution_functions import *
 class Walls:
 	"""
 	Тип данных, описывающий стену.
-	Содержит координаты и размеры стены а также тип (1 - вертикальная стена,
+	Содержит координаты(Walls.x и Walls.y) и размеры(Walls.x_size и Walls.y_size) стены а также тип (1 - вертикальная стена,
 	2 - горизонтальная стена)
 	"""
 	def __init__(self, screen, type_of_wall, x = None, y = None):
@@ -33,11 +33,12 @@ class Walls:
 
 class Pacman_smart:
 	"""
-	Тип данных, описывающий pacman'а (хищник).
-	Содержит его координаты, размеры, скорость, направление скорости, время, которое он может прожить без еды, количество
-	очков сытости, которое ему необходимо для размножения.
+	Тип данных, описывающий хищника с умной моделью поведения.
+	Содержит его координаты(Pacman_smart.x и Pacman_smart.y), размеры(Pacman_smart.r), скорость(Pacman_smart.vx и Pacman_smart.vy),
+	направление скорости(Pacman_smart.angle_speed), время(Pacman_smart.time_without_food), которое он может прожить без еды, текущее количество
+	очков сытости(self.point).
 	"""
-	def __init__(self, screen, TIME):
+	def __init__(self, screen, TIME, time_to_die_predator):
 		self.point = 0
 		self.screen = screen
 		self.color = YELLOW
@@ -50,7 +51,6 @@ class Pacman_smart:
 		self.angle_speed = self.vy / self.vx
 		self.time_to_die = time_to_die_predator
 		self.time_without_food = 0
-		self.food_level = 0
 		self.last_eat_time = TIME // 100
 
 	def move(self):
@@ -156,24 +156,23 @@ class Pacman_smart:
 		if (self.time_to_die * 10) <= self.time_without_food:
 			list_of_pacmans.remove(self)
 
-	def reproduction_check(self, TIME, number_of_food = 3):
+	def reproduction_check(self, TIME, time_to_die, number_of_food = 3):
 		"""
 		Функция, создающая нового пакмана рядом с данным, если данный пакман набрал
 		number_of_food очков сытости
 		"""
 		if self.point >= number_of_food:
-			born_new_pacman(Pacman_smart, TIME, self.x, self.y)
+			born_new_pacman(Pacman_smart, TIME, self.x, self.y, time_to_die)
 			self.point = 0
 
 class Pacman_direct(Pacman_smart):
 	"""
-	Тип данных, описывающий pacman'а (хищник).
-	Содержит его координаты, размеры, скорость, направление скорости, время, которое он может прожить без еды, количество
-	очков сытости, которое ему необходимо для размножения.
+	Тип данных, описывающий хищника с прямолинейной моделью поведения. В отличии от Pacman_smart просто следует за целью
+	в любой ситуации, отвлекаясь лишь на огибание препятствия.
 	"""
 	def move(self):
 		"""
-		Данный метод описывает движение травоядного. Метод находит цель, которая находится на наименьшем расстоянии от травоядного,
+		Данный метод описывает движение хищника. Метод находит цель, которая находится на наименьшем расстоянии от хищника,
 		и изменяет его скорость так, чтобы он двигался к цели.
 		"""
 		distance = 1000000
@@ -206,22 +205,23 @@ class Pacman_direct(Pacman_smart):
 		if (self.time_to_die * 10) <= self.time_without_food:
 			list_of_pacmans_direct.remove(self)
 
-	def reproduction_check(self, TIME, number_of_food = 3):
+	def reproduction_check(self, TIME, time_to_die, number_of_food = 3):
 		"""
-		Функция, создающая нового пакмана рядом с данным, если данный пакман набрал
+		Функция, создающая нового хищника рядом с данным, если данный пакман набрал
 		number_of_food очков сытости
 		"""
 		if self.point >= number_of_food:
-			born_new_pacman(Pacman_direct, TIME, self.x, self.y, list_of_pacmans_direct)
+			born_new_pacman(Pacman_direct, TIME, self.x, self.y, time_to_die, list_of_pacmans_direct)
 			self.point = 0
 
 class herbivore:
 	"""
 	Тип данных, описывающий травоядных.
-	Содержит его координаты, размеры, скорость, направление скорости, время, которое он может прожить без еды, количество
-	очков сытости, которое ему необходимо для размножения, его сытность для хищника.
+	Содержит его координаты (herbivore.x и herbivore.y), размеры(herbivore.r), скорость (herbivore.vx и herbivore.vy),
+	время(herbivore.time_without_food), которое он может прожить без еды, текущее количество количество
+	очков сытости(herbivore.point), которое ему необходимо для размножения, его сытность для хищника(herbivore.satiety).
 	"""
-	def __init__(self, screen, TIME):
+	def __init__(self, screen, TIME, time_to_die_herbivore):
 		self.parent = None
 		self.point = 0
 		self.satiety = 1
@@ -236,7 +236,6 @@ class herbivore:
 		self.v = ((self.vx)**2 + (self.vy)**2)**0.5
 		self.time_to_die = time_to_die_herbivore
 		self.time_without_food = 0
-		self.food_level = 0
 		self.last_eat_time = TIME // 100
 
 	def collision_check(self):
@@ -306,7 +305,7 @@ class herbivore:
 
 	def draw(self):
 		"""
-		Функция отрисовфвабщая травоядного.
+		Функция отрисовывающая травоядного.
 		"""
 		pygame.draw.circle(screen, self.color, (self.x, self.y), self.r )
 
@@ -317,13 +316,13 @@ class herbivore:
 		if (self.time_to_die * 10) <= self.time_without_food:
 			list_of_herbivore.remove(self)
 
-	def reproduction_check(self, TIME, number_of_food = 3):
+	def reproduction_check(self, TIME, time_to_die, number_of_food = 3):
 		"""
 		Функция, создающая нового травоядного рядом с данным, если данный травоядный набрал
 		number_of_food очков сытости
 		"""
 		if self.point >= number_of_food:
-			new_herbivore = herbivore(screen, TIME)
+			new_herbivore = herbivore(screen, TIME, time_to_die)
 			new_herbivore.x = self.x + random.choice([20, -20])
 			new_herbivore.y = self.y + random.choice([20, -20])
 			list_of_herbivore.append(new_herbivore)
@@ -331,7 +330,8 @@ class herbivore:
 
 class Food:
 	"""
-	Класс еды для траводяных (зеленые шарики). При поедании дают травоядному Food.point очков сытости
+	Класс еды для траводяных (зеленые шарики). При поедании дают травоядному Food.point очков сытости. Обладают
+	радиусом Food.r и координатами Food.x b Food.y
 	"""
 	def __init__(self, screen):
 		self.point = 1

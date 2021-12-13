@@ -8,11 +8,12 @@ from tkinter import *
 При запуске программы появляется number_of_walls стен. Раз в period_of_spawn_food единиц времени появляется 
 number_of_foods зеленых шариков (еды) в случайном месте на экране. 
 При нажатии на левую кнопку мыши появляются синие шарики (травоядные), которые движутся до ближайшей еды и 
-едят ее. При нажатии на клавиатуре на нижнюю стрелку появляется желтый шар (хищник), преследующий травоядных,
-если он догоняет их, то ест. Оба вида шариков не могут пройти через стены. Через time_draw_graphic спустя
+едят ее. При нажатии на клавиатуре на нижнюю стрелку появляется желтый шар (умный хищник), преследующий травоядных,
+если он догоняет их, то ест. При нажатии на верхнюю стрелку появляется белый шар (прямолинейный хищник), который
+движется прямо к цели. Все виды шариков не могут пройти через стены. Через time_draw_graphic спустя
 запуска программы рисуется график зависимости числа особей (хищников и травоядных) от времени.
-При нажатии на w создает еду там, где находится курсор мыши. Аналогично для a (вертикальная стена) и s (горизонтальная
-стена)
+При нажатии на w создает еду там, где находится курсор мыши. Аналогично для A (вертикальная стена), S (горизонтальная
+стена), Z (умный хищник), X (прямолинейный хищник).
 """
 
 
@@ -22,17 +23,21 @@ number_of_walls = 50
 number_of_foods = 30
 period_of_spawn_food = 1
 time_draw_graphic = 50
+time_to_die_herbivore = 2
+time_to_die_predator = 2.5
 
-def submit(opt1, opt2, opt3, opt4):
-	global number_of_walls, number_of_foods, period_of_spawn_food, time_draw_graphic
+def submit(opt1, opt2, opt3, opt4, opt5, opt6):
+	global number_of_walls, number_of_foods, period_of_spawn_food, time_draw_graphic, time_to_die_predator, time_to_die_herbivore
 	number_of_walls = int(opt1)
 	number_of_foods = int(opt2)
 	period_of_spawn_food = int(opt3)
 	time_draw_graphic = int(opt4)
+	time_to_die_predator = int(opt5)
+	time_to_die_herbivore = int(opt6)
 
 def settings():
 	def clicked():
-		submit(txt1.get(), txt2.get(), txt3.get(), txt4.get())
+		submit(txt1.get(), txt2.get(), txt3.get(), txt4.get(), txt5.get(), txt6.get())
 		options.destroy()
 	options = Tk()
 	options.title("Settings")
@@ -41,18 +46,26 @@ def settings():
 	lbl2 = Label(options, text="number of foods")
 	lbl3 = Label(options, text="period of spawn food")
 	lbl4 = Label(options, text="time draw graphic")
+	lbl5 = Label(options, text="time live without food predator")
+	lbl6 = Label(options, text="time live without food herbivore")
 	txt1 = Entry(options, width=10)
 	txt2 = Entry(options, width=10)
 	txt3 = Entry(options, width=10)
 	txt4 = Entry(options, width=10)
+	txt5 = Entry(options, width=10)
+	txt6 = Entry(options, width=10)
 	lbl1.grid(column=0, row=0)
 	lbl2.grid(column=0, row=1)
 	lbl3.grid(column=0, row=2)
 	lbl4.grid(column=0, row=3)
+	lbl5.grid(column=0, row=4)
+	lbl6.grid(column=0, row=5)
 	txt1.grid(column=1, row=0)
 	txt2.grid(column=1, row=1)
 	txt3.grid(column=1, row=2)
 	txt4.grid(column=1, row=3)
+	txt5.grid(column=1, row=4)
+	txt6.grid(column=1, row=5)
 	btn4 = Button(options,
 				  text="Submit",
 				  background="#555",
@@ -62,7 +75,7 @@ def settings():
 				  font="16",
 				  command=clicked
 				  )
-	btn4.grid(column=1, row=4)
+	btn4.grid(column=1, row=6)
 
 def start():
 	pygame.init()
@@ -77,19 +90,19 @@ def start():
 		time = pygame.time.get_ticks() - moment_of_start
 		screen.fill(BLACK)
 		grov_new_food(Food, time, number_of_foods, period_of_spawn_food)
-		move_and_draw_all_object(time)
+		move_and_draw_all_object(time, time_to_die_herbivore, time_to_die_predator)
 		groving_up_check()
 		write_data_for_graphic(time)
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
 				finished = True
 			elif event.type == pygame.MOUSEBUTTONDOWN:
-				fill_list_of_herbivore(herbivore, time)
+				fill_list_of_herbivore(herbivore, time, time_to_die_herbivore)
 		keys = pygame.key.get_pressed()
 		if keys[pygame.K_DOWN]:
-			fill_list_of_pacmans(Pacman_smart, time)
+			fill_list_of_pacmans(Pacman_smart, time, time_to_die_predator)
 		elif keys[pygame.K_UP]:
-			fill_list_of_pacmans_direct(Pacman_direct, time)
+			fill_list_of_pacmans_direct(Pacman_direct, time, time_to_die_predator)
 		elif keys[pygame.K_w]:
 			added_new_food(Food, pos[0], pos[1])
 		elif keys[pygame.K_s]:
@@ -97,9 +110,9 @@ def start():
 		elif keys[pygame.K_a]:
 			added_new_wall(Walls, pos[0], pos[1], -1)
 		elif keys[pygame.K_z]:
-			added_new_predator(Pacman_smart, time, pos[0], pos[1], list_of_pacmans)
+			added_new_predator(Pacman_smart, time, pos[0], pos[1], time_to_die_predator, list_of_pacmans)
 		elif keys[pygame.K_x]:
-			added_new_predator(Pacman_direct, time, pos[0], pos[1], list_of_pacmans_direct)
+			added_new_predator(Pacman_direct, time, pos[0], pos[1], time_to_die_predator, list_of_pacmans_direct)
 		if time // 1000 == time_draw_graphic:
 			draw_graphic()
 		pygame.display.update()

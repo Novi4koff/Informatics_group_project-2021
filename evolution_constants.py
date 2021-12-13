@@ -41,14 +41,6 @@ current_number_of_predator = []
 current_time_system_living = []
 current_number_of_predator_direct = []
 food_time_last = -1
-walls_x_size = 4
+walls_x_size = 3
 walls_y_size = 60
-'''
-Начальные условия
-'''
-number_of_walls = 0
-number_of_foods = 20
-period_of_spawn_food = 1
-time_draw_graphic = 30
-time_to_die_herbivore = 200
-time_to_die_predator = 200
+
