@@ -1,10 +1,10 @@
-from evolution_variables import *
+from evolution_constants import *
 
-def fill_list_of_walls_separate(body):
+def fill_list_of_walls_separate(body, num):
 	"""
 	Функция заполняющая список стен случайными стенами
 	"""
-	for i in range (number_of_walls):
+	for i in range (num):
 		type_of_wall = random.choice(TYPES_OF_WALLS)
 		new_wall = body(screen, type_of_wall)
 		list_of_walls.append(new_wall)
@@ -43,11 +43,11 @@ def fill_list_of_pacmans(body, TIME):
 	new_pacman = body(screen, TIME)
 	list_of_pacmans.append(new_pacman)
 
-def fill_list_of_foods(body):
+def fill_list_of_foods(body, num):
 	"""
 	Функция заполняющая список еды для травоядных
 	"""
-	for i in range(number_of_foods):
+	for i in range(num):
 		new_food = body(screen)
 		list_of_foods.append(new_food)
 
@@ -144,14 +144,14 @@ def time_count(TIME, screen, x, y, font_size):
 	Time = font2.render(time_text, True, YELLOW)
 	screen.blit(Time, [x, y])
 
-def grov_new_food(body, TIME):
+def grov_new_food(body, TIME, num, period):
 	"""
 	Функция создающая новую еду каждые period_of_spawn_food единицу времени.
 	"""
 	global food_time_last
 	food_time = TIME // 1000
-	if food_time % period_of_spawn_food == 0 and not (food_time_last == food_time) :
-		fill_list_of_foods(body)
+	if food_time % period == 0 and not (food_time_last == food_time) :
+		fill_list_of_foods(body, num)
 		food_time_last = food_time
 
 def write_data_for_graphic(TIME):
