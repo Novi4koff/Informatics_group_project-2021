@@ -7,7 +7,6 @@ import random
 import math
 import matplotlib.pyplot as plt
 
-FPS = 45
 window_width = 0
 window_height = 0
 if os.name == "nt":
@@ -44,8 +43,9 @@ current_number_of_predator_direct = []
 food_time_last = -1
 walls_x_size = 4
 walls_y_size = 60
-
-'''Начальные условия'''
+'''
+Начальные условия
+'''
 number_of_walls = 0
 number_of_foods = 20
 period_of_spawn_food = 1
