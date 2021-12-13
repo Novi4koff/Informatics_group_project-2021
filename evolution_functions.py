@@ -38,10 +38,18 @@ def fill_list_of_herbivore(body, TIME):
 
 def fill_list_of_pacmans(body, TIME):
 	"""
-	Функция заполняющая список хищников
+	Функция заполняющая список хищников с "умной" моделью поведения
 	"""
 	new_pacman = body(screen, TIME)
 	list_of_pacmans.append(new_pacman)
+
+def fill_list_of_pacmans_direct(body, TIME):
+	"""
+	Функция заполняющая список хищников с "прямой"" моделью поведения
+	"""
+	new_pacman = body(screen, TIME)
+	new_pacman.color = WHITE
+	list_of_pacmans_direct.append(new_pacman)
 
 def fill_list_of_foods(body):
 	"""
@@ -71,6 +79,12 @@ def move_and_draw_all_object(TIME):
 	for pacman in list_of_pacmans_child:
 		pacman.draw()
 		#pacman.move() FIXME# Написать движение pacman_child. Если будем использовать подкласс Pacman_child
+	for pacman in list_of_pacmans_direct:
+		pacman.move()
+		pacman.draw()
+		pacman.eat_check(TIME)
+		pacman.die_check()
+		pacman.reproduction_check(TIME)
 	for wall in list_of_walls:
 		wall.draw()
 	for food in list_of_foods:
@@ -89,13 +103,14 @@ def groving_up_check(list_of_creatures = list_of_pacmans_child):
 		if True is False:
 			children.growing_up()
 
-def added_new_pacman(body, TIME, x, y, list_ = list_of_pacmans, parent = None):
+def born_new_pacman(body, TIME, x, y, list_ = list_of_pacmans, parent = None):
 	"""
 	Функция создающая хищника в данных координатах (x, y) в массиве list_
 	с родителем parent
 	"""
-	if list_ is list_of_pacmans:
-		new_pacman = body(screen, TIME)
+	new_pacman = body(screen, TIME)
+	if list_ is list_of_pacmans_direct:
+		new_pacman.color = WHITE
 	if list_ is list_of_pacmans_child:
 		new_pacman = Pacman_child(screen)
 		new_pacman.color = RED
@@ -115,6 +130,17 @@ def added_new_food(body, x, y, vx = 0, vy = 0):
 	new_target.vx = vx
 	new_target.vy = vy
 	list_of_foods.append(new_target)
+
+def added_new_predator(body, TIME, x, y, list_ = list_of_pacmans):
+	"""
+	Функция добавляющая нового хищника типа body в точку (x, y).
+	"""
+	new_target = body(screen, TIME)
+	if list_ is list_of_pacmans_direct:
+		new_target.color = WHITE
+	new_target.x = x
+	new_target.y = y
+	list_.append(new_target)
 
 def added_new_wall(body, x, y, type_of_wall):
 	"""
@@ -160,6 +186,7 @@ def write_data_for_graphic(TIME):
     """
 	current_number_of_herbivore.append(len(list_of_herbivore))
 	current_number_of_predator.append(len(list_of_pacmans))
+	current_number_of_predator_direct.append(len(list_of_pacmans_direct))
 	current_time_system_living.append(TIME // 10)
 
 def draw_graphic():
@@ -171,4 +198,5 @@ def draw_graphic():
 	plt.xlabel(r'время')
 	plt.title(r'Число особей от времени')
 	plt.plot(current_time_system_living, current_number_of_predator)
+	plt.plot(current_time_system_living, current_number_of_predator_direct)
 	plt.show()

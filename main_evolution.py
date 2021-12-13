@@ -35,10 +35,16 @@ while not finished:
 		fill_list_of_pacmans(Pacman_smart, time)
 	elif keys[pygame.K_w]:
 		added_new_food(Food, pos[0], pos[1])
+	elif keys[pygame.K_UP]:
+		fill_list_of_pacmans_direct(Pacman_direct, time)
 	elif keys[pygame.K_s]:
 		added_new_wall(Walls, pos[0], pos[1], 1)
 	elif keys[pygame.K_a]:
 		added_new_wall(Walls, pos[0], pos[1], -1)
+	elif keys[pygame.K_z]:
+		added_new_predator(Pacman_smart, time, pos[0], pos[1], list_of_pacmans)
+	elif keys[pygame.K_x]:
+		added_new_predator(Pacman_direct, time, pos[0], pos[1], list_of_pacmans_direct)
 	if time // 1000 == time_draw_graphic:
 		draw_graphic()
 	pygame.display.update()

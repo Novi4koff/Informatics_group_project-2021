@@ -48,7 +48,7 @@ class Pacman_smart:
 		self.vy = 2
 		self.v = ((self.vx)**2 + (self.vy)**2)**0.5
 		self.angle_speed = self.vy / self.vx
-		self.time_to_die = 2.5
+		self.time_to_die = time_to_die_predator
 		self.time_without_food = 0
 		self.food_level = 0
 		self.last_eat_time = TIME // 100
@@ -66,15 +66,22 @@ class Pacman_smart:
 		sgnvx = 0
 		sgnvy = 0
 		if not list_of_herbivore == []:
+
 			for targets in list_of_herbivore:
+				if list_of_foods == []:
+					targets.vx = targets.vy = 0
 				vx_per = -targets.vx
 				vy_per = -targets.vy
-				v_per = ((vx_per)**2 + (vy_per)**2)**0.5
 				distance = ((self.x - targets.x)**2 + (self.y - targets.y)**2)**0.5
-				cos_vper_distance = (((vx_per * (- self.x + targets.x) + vy_per * (- self.y + targets.y))/ (distance * v_per + 0.000001)))
-				diskr = (v_per * cos_vper_distance)**2 - ((v_per)**2 - (self.v)**2)
-				v_relativ = ((cos_vper_distance * v_per) + (diskr)**0.5)
-				time_to_targets = distance / (v_relativ + 0.00001)
+				if not ((vx_per == 0) and (vy_per == 0)): 
+					v_per = ((vx_per)**2 + (vy_per)**2)**0.5
+					cos_vper_distance = (((vx_per * (- self.x + targets.x) + vy_per * (- self.y + targets.y))/ (distance * v_per + 0.000001)))
+					diskr = (v_per * cos_vper_distance)**2 - ((v_per)**2 - (self.v)**2)
+					v_relativ = ((cos_vper_distance * v_per) + (diskr)**0.5)
+					time_to_targets = distance / (v_relativ + 0.00001)
+				else:
+					v_relativ = self.v
+					time_to_targets = distance / (v_relativ + 0.00001)
 				if (0 < time_to_targets < min_time_to_targets):
 					min_time_to_targets = time_to_targets
 					v_relativ_max = v_relativ
@@ -109,9 +116,9 @@ class Pacman_smart:
 		столкновения огибает препятствие по кратчайшему пути.
 		#FIXME Застревает в случае столкновения с узкой границей стены
 		"""
-		if not (x_borders[0] <= (self.x + self.vx + self.r) <= x_borders[1]):
+		if not (x_borders[0] <= (self.x + self.vx) <= x_borders[1]):
 			self.vx = -self.vx
-		if not (y_borders[0] <= (self.y + self.vy + self.r) <= y_borders[1]):
+		if not (y_borders[0] <= (self.y + self.vy) <= y_borders[1]):
 			self.vy = -self.vy
 		for wall in list_of_walls:
 			if (wall.x - (self.r / 2)) <= (self.x + self.vx) <= (wall.x + wall.x_size + (self.r / 2)) and (wall.y - (self.r / 2)) <= (self.y + self.vy) <= (wall.y + wall.y_size + (self.r / 2)):
@@ -155,7 +162,57 @@ class Pacman_smart:
 		number_of_food очков сытости
 		"""
 		if self.point >= number_of_food:
-			added_new_pacman(Pacman_smart, TIME, self.x, self.y)
+			born_new_pacman(Pacman_smart, TIME, self.x, self.y)
+			self.point = 0
+
+class Pacman_direct(Pacman_smart):
+	"""
+	Тип данных, описывающий pacman'а (хищник).
+	Содержит его координаты, размеры, скорость, направление скорости, время, которое он может прожить без еды, количество
+	очков сытости, которое ему необходимо для размножения.
+	"""
+	def move(self):
+		"""
+		Данный метод описывает движение травоядного. Метод находит цель, которая находится на наименьшем расстоянии от травоядного,
+		и изменяет его скорость так, чтобы он двигался к цели.
+		"""
+		distance = 1000000
+		sgnvx = 0
+		sgnvy = 0
+		if not list_of_herbivore == []:
+			for targets in list_of_herbivore:
+				if ((self.x - targets.x)**2 + (self.y - targets.y)**2)**0.5 < distance:
+					distance = ((self.x - targets.x)**2 + (self.y - targets.y)**2)**0.5
+					self.angle_speed = (targets.y - self.y) / (targets.x - self.x + 0.000001)
+					if  targets.y - self.y >= 0:
+						sgnvy = 1
+					else:
+						sgnvy = -1
+					if  targets.x - self.x >= 0:
+						sgnvx = 1
+					else:
+						sgnvx = -1
+			self.vx = sgnvx * (self.v / ((1 + (self.angle_speed)**2))**0.5)
+			self.vy = sgnvy * (((self.v)**2 - (self.vx)**2)**0.5)
+			self.collision_check()
+			if distance < 1000000:
+				self.x += self.vx
+				self.y += self.vy
+
+	def die_check(self):
+		"""
+		Функция, убивающая хищника, если оно не ело self.time_to_die времени.
+		"""
+		if (self.time_to_die * 10) <= self.time_without_food:
+			list_of_pacmans_direct.remove(self)
+
+	def reproduction_check(self, TIME, number_of_food = 3):
+		"""
+		Функция, создающая нового пакмана рядом с данным, если данный пакман набрал
+		number_of_food очков сытости
+		"""
+		if self.point >= number_of_food:
+			born_new_pacman(Pacman_direct, TIME, self.x, self.y, list_of_pacmans_direct)
 			self.point = 0
 
 class herbivore:
@@ -170,14 +227,14 @@ class herbivore:
 		self.satiety = 1
 		self.screen = screen
 		self.color = BLUE
-		self.x = random.randint(x_borders[0], x_borders[1])
-		self.y = random.randint(y_borders[0], y_borders[1])
-		speed_herbivore = [-1, -2, 1, 2]
+		self.r = 4
+		self.x = random.randint(x_borders[0] + self.r, x_borders[1] - self.r)
+		self.y = random.randint(y_borders[0] + self.r, y_borders[1] - self.r)
+		speed_herbivore = [-2, -1, 1, 2]
 		self.vx = random.choice(speed_herbivore)
 		self.vy = random.choice(speed_herbivore)
 		self.v = ((self.vx)**2 + (self.vy)**2)**0.5
-		self.r = 4
-		self.time_to_die = 2.0
+		self.time_to_die = time_to_die_herbivore
 		self.time_without_food = 0
 		self.food_level = 0
 		self.last_eat_time = TIME // 100
@@ -280,9 +337,9 @@ class Food:
 		self.point = 1
 		self.screen = screen
 		self.color = GREEN
-		self.x = random.randint(x_borders[0], x_borders[1])
-		self.y = random.randint(y_borders[0], y_borders[1])
 		self.r = 3
+		self.x = random.randint(x_borders[0] + 3 * self.r, x_borders[1] - 3 * self.r)
+		self.y = random.randint(y_borders[0] + 3 * self.r, y_borders[1] - 3 * self.r)
 
 	def draw(self):
 		pygame.draw.circle(screen, self.color, (self.x, self.y), self.r )
