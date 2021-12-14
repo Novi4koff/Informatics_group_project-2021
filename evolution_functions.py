@@ -72,6 +72,7 @@ def move_and_draw_all_object(TIME, time_to_die_herbivore, time_to_die_predator):
 	for food in list_of_foods:
 		food.draw()
 	#score(screen, 10, 30, 40)
+	Rule_text(screen, 10, 35, 25, 20)
 	time_count(TIME, screen, 10, 10, 40)
 	pygame.display.update()
 
@@ -160,6 +161,21 @@ def time_count(TIME, screen, x, y, font_size):
 	time_text = "Прошло времени: " + str(round(TIME // 1000))
 	Time = font2.render(time_text, True, YELLOW)
 	screen.blit(Time, [x, y])
+
+def Rule_text(screen, x, y, font_size, indent):
+	"""
+	Функция, выводящая кнопки управления на экран.
+	"""
+	font2 = pygame.font.Font(None, font_size)
+	text1 = "Создать: W - траву  Q - травоядного"
+	text2 = "A - горизонтальную стену  S - вертикальную стену"
+	text3 = "Z - умный хищник  X - прямолинейный хищник"
+	Rule_text1 = font2.render(text1, True, YELLOW)
+	Rule_text2 = font2.render(text2, True, YELLOW)
+	Rule_text3 = font2.render(text3, True, YELLOW)
+	screen.blit(Rule_text1, [x, y])
+	screen.blit(Rule_text2, [x, y + indent])
+	screen.blit(Rule_text3, [x, y + 2 * indent])
 
 def grov_new_food(body, TIME, num, period):
 	"""

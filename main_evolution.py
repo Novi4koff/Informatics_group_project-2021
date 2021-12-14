@@ -52,6 +52,7 @@ def submit(opt1, opt2, opt3, opt4, opt5, opt6, opt7, opt8, opt9, opt10, opt11, o
 	time_to_die_predator = int(opt9)
 	time_to_die_herbivore = int(opt10)
 
+
 def free_mode():
 	"""
 	Функция устанавливает все параметры из настроек на 0, кроме time_draw_graphic = 10000
@@ -174,6 +175,7 @@ def start():
 		elif keys[pygame.K_w]:
 			added_new_food(Food, pos[0], pos[1])
 		elif keys[pygame.K_s]:
+			print('')
 			added_new_wall(Walls, pos[0], pos[1], 1)
 		elif keys[pygame.K_a]:
 			added_new_wall(Walls, pos[0], pos[1], -1)
