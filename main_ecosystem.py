@@ -1,7 +1,7 @@
 import pygame.time
-from evolution_constants import *
-from evolution_classes import *
-from evolution_functions import *
+from ecosystem_constants import *
+from ecosystem_classes import *
+from ecosystem_functions import *
 from tkinter import *
 
 """

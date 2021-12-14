@@ -1,5 +1,5 @@
-from evolution_constants import *
-from evolution_functions import *
+from ecosystem_constants import *
+from ecosystem_functions import *
 
 class Walls:
 	"""

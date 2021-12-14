@@ -1,4 +1,4 @@
-from evolution_constants import *
+from ecosystem_constants import *
 
 def fill_list_of_walls_separate(body, num):
 	"""
