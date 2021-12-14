@@ -32,7 +32,7 @@ period_of_spawn_direct_predator = 5
 period_of_spawn_food = 1
 time_draw_graphic = 30
 time_to_die_herbivore = 2
-time_to_die_predator = 2.5
+time_to_die_predator = 3
 
 def submit(opt1, opt2, opt3, opt4, opt5, opt6, opt7, opt8, opt9, opt10, opt11, opt12):
 	global number_of_walls, number_of_foods, period_of_spawn_food, time_draw_graphic, time_to_die_predator, time_to_die_herbivore, \
@@ -74,6 +74,7 @@ def free_mode():
 	time_draw_graphic = 10000
 	time_to_die_predator = 100
 	time_to_die_herbivore = 100
+	btn3.configure(background='red')
 
 def settings():
 	def clicked():
@@ -82,7 +83,7 @@ def settings():
 		options.destroy()
 	options = Tk()
 	options.title("Settings")
-	options.geometry('320x320')
+	options.geometry('400x450')
 	lbl1 = Label(options, text="number of walls")
 	lbl2 = Label(options, text="number of foods")
 	lbl3 = Label(options, text="period of spawn food")
@@ -107,6 +108,18 @@ def settings():
 	txt10 = Entry(options, width=10)
 	txt11 = Entry(options, width=10)
 	txt12 = Entry(options, width=10)
+	txt1.insert(0, str(number_of_walls))
+	txt2.insert(0, str(number_of_foods))
+	txt3.insert(0, str(period_of_spawn_food))
+	txt4.insert(0, str(number_of_smart_predator))
+	txt5.insert(0, str(period_of_spawn_smart_predator))
+	txt6.insert(0, str(number_of_direct_predator))
+	txt7.insert(0, str(period_of_spawn_direct_predator))
+	txt8.insert(0, str(time_draw_graphic))
+	txt9.insert(0, str(time_to_die_predator))
+	txt10.insert(0, str(time_to_die_herbivore))
+	txt11.insert(0, str(number_of_herb))
+	txt12.insert(0, str(period_of_spawn_herb))
 	lbl1.grid(column=0, row=0)
 	lbl2.grid(column=0, row=1)
 	lbl3.grid(column=0, row=2)
@@ -132,7 +145,7 @@ def settings():
 	txt11.grid(column=1, row=10)
 	txt12.grid(column=1, row=11)
 
-	btn4 = Button(options,
+	btn5 = Button(options,
 				  text="Submit",
 				  background="#555",
 				  foreground="#ccc",
@@ -141,7 +154,7 @@ def settings():
 				  font="16",
 				  command=clicked
 				  )
-	btn4.grid(column=1, row=12)
+	btn5.grid(column=1, row=12)
 
 def start():
 	pygame.init()
@@ -209,7 +222,7 @@ btn2 = Button(text="Settings",
 			 font="16",
 			 command=settings
 			 )
-btn4 = Button(text="Free mode",
+btn3 = Button(text="Free mode",
 			 background="#555",
 			 foreground="#ccc",
 			 padx="20",
@@ -217,7 +230,7 @@ btn4 = Button(text="Free mode",
 			 font="16",
 			 command=free_mode
 			 )
-btn3 = Button(text="Quit",
+btn4 = Button(text="Quit",
 			 background="#555",
 			 foreground="#ccc",
 			 padx="20",
@@ -227,8 +240,8 @@ btn3 = Button(text="Quit",
 			 )
 btn1.pack()
 btn2.pack()
-btn4.pack()
 btn3.pack()
+btn4.pack()
 
 window.mainloop()
 
