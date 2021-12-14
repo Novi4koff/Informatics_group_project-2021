@@ -41,6 +41,9 @@ current_number_of_predator = []
 current_time_system_living = []
 current_number_of_predator_direct = []
 food_time_last = -1
+herbivore_time_last = -1
+smart_predator_time_last = -1
+direct_predator_time_last = -1
 walls_x_size = 3
 walls_y_size = 60
 

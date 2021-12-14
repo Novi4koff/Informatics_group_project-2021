@@ -10,26 +10,6 @@ def fill_list_of_walls_separate(body, num):
 		new_wall = body(screen, type_of_wall)
 		list_of_walls.append(new_wall)
 
-def fill_list_of_walls_continous():
-	"""
-	Функция создающая непрерывную стену
-	#FIXME не работает, впрочем пока и не используется
-	"""
-	for i in range (number_of_walls):
-		type_of_wall = random.choice(TYPES_OF_WALLS)
-		if i == 0:
-			new_wall = Walls(screen, type_of_wall, 450, 450)
-			list_of_walls.append(new_wall)
-		else:
-			last_wall = list_of_walls[-1]
-			type_of_wall = -(last_wall.type_of_wall)
-			COORDINATE_X = [last_wall.x, last_wall.x + last_wall.x_size]
-			x_new_wall = random.choice(COORDINATE_X)
-			COORDINATE_Y = [last_wall.y, last_wall.y + last_wall.y_size]
-			y_new_wall = random.choice(COORDINATE_Y)
-			new_wall = Walls(screen, type_of_wall, x_new_wall, y_new_wall)
-			list_of_walls.append(new_wall)
-
 def fill_list_of_herbivore(body, TIME, time_to_die):
 	"""
 	Функция создающая травоядного со случайными координатами
@@ -91,7 +71,7 @@ def move_and_draw_all_object(TIME, time_to_die_herbivore, time_to_die_predator):
 		wall.draw()
 	for food in list_of_foods:
 		food.draw()
-	score(screen, 10, 30, 40)
+	#score(screen, 10, 30, 40)
 	time_count(TIME, screen, 10, 10, 40)
 	pygame.display.update()
 
@@ -144,6 +124,15 @@ def added_new_predator(body, TIME, x, y, time_to_die, list_ = list_of_pacmans):
 	new_target.y = y
 	list_.append(new_target)
 
+def added_new_herbivore(body, TIME, x, y, time_to_die):
+	"""
+	Функция добавляющая нового травоядного типа body в точку (x, y).
+	"""
+	new_target = body(screen, TIME, time_to_die)
+	new_target.x = x
+	new_target.y = y
+	list_of_herbivore.append(new_target)
+
 def added_new_wall(body, x, y, type_of_wall):
 	"""
 	Функция добавляющая новую стену типа type_of_wall в точку (x, y).
@@ -178,9 +167,46 @@ def grov_new_food(body, TIME, num, period):
 	"""
 	global food_time_last
 	food_time = TIME // 1000
-	if food_time % period == 0 and not (food_time_last == food_time) :
-		fill_list_of_foods(body, num)
-		food_time_last = food_time
+	if not period == 0:	
+		if food_time % period == 0 and not (food_time_last == food_time) :
+			fill_list_of_foods(body, num)
+			food_time_last = food_time
+
+def grov_new_herbivor(body, TIME, num, period):
+	"""
+	Функция создающая новых травоядных каждые period единицу времени в количестве num штук
+	"""
+	global herbivore_time_last
+	herbivore_time = TIME // 1000
+	if not period == 0:
+		if herbivore_time % period == 0 and not (herbivore_time_last == herbivore_time) :
+			for i in range(num):
+				fill_list_of_herbivore(body, TIME, num)
+				herbivore_time_last = herbivore_time
+
+def grov_new_smart_predator(body, TIME, num, period):
+	"""
+	Функция создающая новых умных хищников каждые period единицу времени в количестве num штук
+	"""
+	global smart_predator_time_last
+	smart_predator_time = TIME // 1000
+	if not period == 0:
+		if smart_predator_time % period == 0 and not (smart_predator_time_last == smart_predator_time) :
+			for i in range(num):
+				fill_list_of_pacmans(body, TIME, num)
+				smart_predator_time_last = smart_predator_time
+
+def grov_new_direct_predator(body, TIME, num, period):
+	"""
+	Функция создающая новых прямолинейных хищников каждые period единицу времени в количестве num штук
+	"""
+	global direct_predator_time_last
+	direct_predator_time = TIME // 1000
+	if not period == 0:
+		if direct_predator_time % period == 0 and not (direct_predator_time_last == direct_predator_time) :
+			for i in range(num):
+				fill_list_of_pacmans_direct(body, TIME, num)
+				direct_predator_time_last = direct_predator_time
 
 def write_data_for_graphic(TIME):
 	"""
@@ -191,9 +217,10 @@ def write_data_for_graphic(TIME):
 	current_number_of_predator_direct.append(len(list_of_pacmans_direct))
 	current_time_system_living.append(TIME // 10)
 
-def draw_graphic():
+def draw_graphic(number_of_foods):
 	"""
-    Функция рисующая график зависимости числа особей (хищников и травоядных) от времени.
+    Функция рисующая график зависимости числа особей (хищников и травоядных) от времени и сохраняющая
+    его в папку Graphics под именем graphic_(number_of_foods)_food.
     """
 	plt.plot(current_time_system_living, current_number_of_herbivore)
 	plt.ylabel(r'Число особей')
@@ -201,4 +228,5 @@ def draw_graphic():
 	plt.title(r'Число особей от времени')
 	plt.plot(current_time_system_living, current_number_of_predator)
 	plt.plot(current_time_system_living, current_number_of_predator_direct)
+	plt.savefig('Graphics/graphic_' + str(number_of_foods) + '_food')
 	plt.show()
